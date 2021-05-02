@@ -11,10 +11,11 @@ public interface DistributedLock {
     /**
      * acquire lock
      *
+     * @param key
      * @return client token,also the value for the given key.It is never null
      * @throws LockException exception occur during invoke
      */
-    String acquire() throws LockException;
+    String acquire(String key) throws LockException;
 
     /**
      * release lock

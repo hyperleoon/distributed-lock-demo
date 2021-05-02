@@ -6,6 +6,7 @@ import com.hyperleon.demo.lock.api.LockException;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.SetParams;
 
+import javax.management.MXBean;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
@@ -34,11 +35,6 @@ public class RedisLock implements DistributedLock, ClientTokenGenerate {
      */
     private int expireMillis;
 
-    /**
-     * represent lock
-     */
-    private String lockKey;
-
     private static final String UNLOCK_LUA_SCRIPT = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
 
     private static final Long UNLOCK_SUCCESS = 1L;
@@ -49,16 +45,15 @@ public class RedisLock implements DistributedLock, ClientTokenGenerate {
     private final ReentrantLock lock = new ReentrantLock();
 
 
-    public RedisLock(String lockKey,Jedis jedis, int timeoutMillis, int expireMillis) {
+    public RedisLock(Jedis jedis, int timeoutMillis, int expireMillis) {
         this.jedis = jedis;
         this.timeoutMillis = timeoutMillis;
         this.expireMillis = expireMillis;
-        this.lockKey = lockKey;
     }
 
 
     @Override
-    public String acquire() throws LockException {
+    public String acquire(String lockKey) throws LockException {
         try {
             lock.lock();
             long acquireTimeout = System.currentTimeMillis() + timeoutMillis;
